@@ -1,27 +1,11 @@
 import React from 'react';
 import ReactDOM, { render } from 'react-dom';
 import './index.css';
+import {calculateWinner} from "./JSmodles/calculateWinner"
 
 
-function calculateWinner(squares)
-{
-	const lines = [ // перечисление всех возможных случаев победы
-		[0, 1, 2],
-		[3, 4, 5],
-		[6, 7, 8],
-		[0, 3, 6],
-		[1, 4, 7],
-		[2, 5, 8],
-	 ];
-	 for(let i = 0; i < lines.length;i++)
-	 {
-		 const [a,b,c] = lines[i]; // деструктуризация "победной линии" в переменные a,b,c - индексы предпологаемых победных клеток
-		 if(squares[a] !== null && squares[a] === squares[b] && squares[a] === squares[c])
-			 return squares[a]
-		 
-	 }
-	 return null; // дефолтный случай
-}
+
+
 
 
 function Square(props) // Square - зависимый компонент(controlled component), значит, он не имеет собственного state. Конструткор не нужен
@@ -79,7 +63,8 @@ function Square(props) // Square - зависимый компонент(control
 			 history: [{ // история ходов
 					 squares : Array(9).fill(null)
 			}],
-			xIsNext: true // ходил ли "X"
+			xIsNext: true, // ходил ли "X"
+			stepNumber: 0
 		 }
 	 }
 	 handleClick(i) {
@@ -99,10 +84,30 @@ function Square(props) // Square - зависимый компонент(control
 			}
 			); // меняю стейт
 	 }
+	 jumpTo(move) // move - индекс, куда "сместится история"
+	 {
+		
+	 }
 	render() {
 		const history = this.state.history;
 		const current = history[history.length - 1];
 		const winner = calculateWinner(current.squares)
+
+		const moves = history.map((step,move) => {
+			const desc = move ?
+        'Go to move #' + move :
+        'Go to game start';
+			return (
+				<li key={move}>
+					<button
+					className="history"
+					onClick={() => this.jumpTo(move)} // в параметр jumpTo передаётся индекс одного из положения на поле боя
+					>{desc}</button>
+				</li>
+			)
+
+		})
+
 		let status;
 		if(winner) status = "Winner : " + winner;
 		else status = "Next player : " + (this.state.xIsNext ? "X" : "O");
@@ -116,7 +121,7 @@ function Square(props) // Square - зависимый компонент(control
 			</div>
 			<div className="game-info">
 			  <div>{status}</div>
-			  <ol>{/* TODO */}</ol>
+			  <ol>{moves}</ol>
 			</div>
 		 </div>
 	  );
@@ -129,3 +134,4 @@ function Square(props) // Square - зависимый компонент(control
 	document.getElementById('root')
  );
  
+
