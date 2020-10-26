@@ -1,4 +1,4 @@
-.square{
+button:not(.history){
 	width: 20px;
 	height: 20px;
 }
