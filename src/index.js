@@ -6,8 +6,6 @@ import {calculateWinner} from "./JSmodles/calculateWinner"
 
 
 
-
-
 function Square(props) // Square - зависимый компонент(controlled component), значит, он не имеет собственного state. Конструткор не нужен
 {
 	return(
@@ -26,8 +24,8 @@ function Square(props) // Square - зависимый компонент(control
 	renderSquare(i) {
 	  return (
 		 <Square
-			value={this.props.squares[i]}
-			onClick={() => this.props.onClick(i)} // лесенка пропсов
+		 value={this.props.squares[i]}
+		 onClick={() => this.props.onClick(i)}
 		 />
 	  );
 	}
@@ -69,10 +67,10 @@ function Square(props) // Square - зависимый компонент(control
 	 }
 	 handleClick(i) {
 		const history = this.state.history; // создаю копию истории
-		const current = history[history.length - 1]; // беру текущее поле
+		const current = history[history.length - 1]; // беру текущее поле(последнее поле)
 		const squares = current.squares; // беру текущее расположение крестиков и ноликов на поле
 		if(calculateWinner(squares) || typeof squares[i] === "string") 
-				return // если победитель есть или клеточка не пустая, клик не засчитывается
+				return; // если победитель есть или клеточка не пустая, клик не засчитывается
 		squares[i] = this.state.xIsNext ? "X" : "O";
 		this.setState(
 			{
@@ -84,48 +82,58 @@ function Square(props) // Square - зависимый компонент(control
 			}
 			); // меняю стейт
 	 }
-	 jumpTo(move) // move - индекс, куда "сместится история"
+	 jumpTo(move) // move - индекс, куда "поедет история"
 	 {
 		
 	 }
-	render() {
+	 render() {
 		const history = this.state.history;
 		const current = history[history.length - 1];
-		const winner = calculateWinner(current.squares)
+		const winner = calculateWinner(current.squares);
 
 		const moves = history.map((step,move) => {
-			const desc = move ?
-        'Go to move #' + move :
-        'Go to game start';
+			const desc = move ? 
+				'Go to move #' + move:
+				'Go to game start';
 			return (
-				<li key={move}>
+				<li>
 					<button
-					className="history"
-					onClick={() => this.jumpTo(move)} // в параметр jumpTo передаётся индекс одного из положения на поле боя
-					>{desc}</button>
+					 onClick={() => this.jumpTo(move)}
+					 className="history"
+					 >{desc}
+					</button>
 				</li>
 			)
-
+			
 		})
 
 		let status;
-		if(winner) status = "Winner : " + winner;
-		else status = "Next player : " + (this.state.xIsNext ? "X" : "O");
-	  return (
-		 <div className="game">
-			<div className="game-board">
-			  <Board 
-			  squares={current.squares}
-			  onClick={(i) => this.handleClick(i)}
-			  />
-			</div>
-			<div className="game-info">
-			  <div>{status}</div>
-			  <ol>{moves}</ol>
-			</div>
-		 </div>
-	  );
-	}
+		// условия гейм-овера
+		if(current.squares.every(content => content !== null))
+		{
+			status = "Game Over! There is no winner!"; 
+		}
+		else if (winner) {
+		  status = 'Winner: ' + winner;
+		} else {
+		  status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+		}
+  
+		return (
+		  <div className="game">
+			 <div className="game-board">
+				<Board
+				  squares={current.squares}
+				  onClick={(i) => this.handleClick(i)}
+				/>
+			 </div>
+			 <div className="game-info">
+				<div>{status}</div>
+				<ol>{moves}</ol>
+			 </div>
+		  </div>
+		);
+	 }
  }
  
  
@@ -134,4 +142,13 @@ function Square(props) // Square - зависимый компонент(control
 	document.getElementById('root')
  );
  
+
+
+
+
+
+
+
+
+
 
