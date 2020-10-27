@@ -59,44 +59,50 @@ function Square(props) // Square - зависимый компонент(control
 		 super(props);
 		 this.state = {
 			 history: [{ // история ходов
-					 squares : Array(9).fill(null)
+					 squares : Array(9).fill(null),
+					 xIsNext : true
 			}],
-			xIsNext: true, // ходил ли "X"
-			stepNumber: 0
+			// xIsNext: true, // ходил ли "X"
+			stepNumber: 0 // на каком мы сейчас ходу
 		 }
 	 }
 	 handleClick(i) {
-		const history = this.state.history; // создаю копию истории
+		const history = this.state.history.slice(0,this.state.stepNumber + 1); // создаю копию истории
 		const current = history[history.length - 1]; // беру текущее поле(последнее поле)
-		const squares = current.squares; // беру текущее расположение крестиков и ноликов на поле
+		const squares = current.squares.slice(); // беру текущее расположение крестиков и ноликов на поле
 		if(calculateWinner(squares) || typeof squares[i] === "string") 
 				return; // если победитель есть или клеточка не пустая, клик не засчитывается
-		squares[i] = this.state.xIsNext ? "X" : "O";
+		squares[i] = current.xIsNext ? "X" : "O";
 		this.setState(
 			{
 			history: [ // обновление истории ходов
 				...history,
-				{squares: squares}
+				{
+					squares: squares,
+					xIsNext: !current.xIsNext
+				}
 			],
-			xIsNext: !this.state.xIsNext,	
+			stepNumber: history.length
 			}
 			); // меняю стейт
 	 }
-	 jumpTo(move) // move - индекс, куда "поедет история"
+	 jumpTo(step) // step - индекс, куда "поедет история"
 	 {
-		
+		this.setState({
+			stepNumber: step, // вношу изменения в state
+		})
 	 }
 	 render() {
 		const history = this.state.history;
-		const current = history[history.length - 1];
-		const winner = calculateWinner(current.squares);
+		const current = history[this.state.stepNumber];
+		const winner = calculateWinner(current.squares); // "X","O", или null
 
 		const moves = history.map((step,move) => {
 			const desc = move ? 
 				'Go to move #' + move:
 				'Go to game start';
 			return (
-				<li>
+				<li key ={move}>
 					<button
 					 onClick={() => this.jumpTo(move)}
 					 className="history"
@@ -106,17 +112,16 @@ function Square(props) // Square - зависимый компонент(control
 			)
 			
 		})
-
 		let status;
 		// условия гейм-овера
-		if(current.squares.every(content => content !== null))
+		if(current.squares.every(content => content !== null) && !calculateWinner(current.squares))
 		{
 			status = "Game Over! There is no winner!"; 
 		}
 		else if (winner) {
 		  status = 'Winner: ' + winner;
 		} else {
-		  status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+		  status = 'Next player: ' + (current.xIsNext ? 'X' : 'O');
 		}
   
 		return (
